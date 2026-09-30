@@ -4,6 +4,7 @@ import {
   ListChecks,
   Users,
   Repeat,
+  Network,
   Plus,
   Zap,
   CalendarDays,
@@ -18,7 +19,8 @@ const navItems = [
   { to: "/", label: "Morning Cockpit", icon: LayoutDashboard, testId: "nav-morning-cockpit" },
   { to: "/today", label: "Today's Work", icon: ListChecks, testId: "nav-todays-work" },
   { to: "/clients", label: "Client Master", icon: Users, testId: "nav-client-master" },
-  { to: "/rules", label: "Recurring Task Rules", icon: Repeat, testId: "nav-recurring-rules" },
+  { to: "/templates", label: "Task Templates", icon: Repeat, testId: "nav-task-templates" },
+  { to: "/assignments", label: "Client Assignments", icon: Network, testId: "nav-client-assignments" },
 ];
 
 export default function AppLayout() {

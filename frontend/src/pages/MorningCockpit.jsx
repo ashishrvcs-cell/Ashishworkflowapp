@@ -174,11 +174,11 @@ export default function MorningCockpit() {
             </Link>
             <span className="text-slate-300">|</span>
             <Link
-              to="/rules"
+              to="/templates"
               className="text-blue-700 hover:underline font-medium"
               data-testid="link-add-rules"
             >
-              Set up Recurring Rules →
+              Add Task Templates →
             </Link>
           </div>
         </div>

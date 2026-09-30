@@ -17,11 +17,19 @@ export const createClient = (body) => http.post("/clients", body).then((r) => r.
 export const updateClient = (id, body) => http.patch(`/clients/${id}`, body).then((r) => r.data);
 export const deleteClient = (id) => http.delete(`/clients/${id}`).then((r) => r.data);
 
-// Rules
-export const listRules = () => http.get("/rules").then((r) => r.data);
-export const createRule = (body) => http.post("/rules", body).then((r) => r.data);
-export const updateRule = (id, body) => http.patch(`/rules/${id}`, body).then((r) => r.data);
-export const deleteRule = (id) => http.delete(`/rules/${id}`).then((r) => r.data);
+// Task Templates (global, client-agnostic)
+export const listTemplates = () => http.get("/templates").then((r) => r.data);
+export const createTemplate = (body) => http.post("/templates", body).then((r) => r.data);
+export const updateTemplate = (id, body) => http.patch(`/templates/${id}`, body).then((r) => r.data);
+export const deleteTemplate = (id) => http.delete(`/templates/${id}`).then((r) => r.data);
+
+// Client Assignments (map template -> client)
+export const listAssignments = (params = {}) =>
+  http.get("/assignments", { params }).then((r) => r.data);
+export const createAssignment = (body) => http.post("/assignments", body).then((r) => r.data);
+export const updateAssignment = (id, body) =>
+  http.patch(`/assignments/${id}`, body).then((r) => r.data);
+export const deleteAssignment = (id) => http.delete(`/assignments/${id}`).then((r) => r.data);
 
 // Tasks
 export const listTasks = (params = {}) => http.get("/tasks", { params }).then((r) => r.data);

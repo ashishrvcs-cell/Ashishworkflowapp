@@ -4,23 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import EmptyState from "@/components/EmptyState";
-import NewRuleDialog from "@/components/dialogs/NewRuleDialog";
+import NewTemplateDialog from "@/components/dialogs/NewTemplateDialog";
 import { PriorityBadge } from "@/components/StatusPill";
-import StaffAvatar from "@/components/StaffAvatar";
 import {
-  listRules,
-  listClients,
-  listStaff,
-  deleteRule,
-  updateRule,
+  listTemplates,
+  listAssignments,
+  deleteTemplate,
+  updateTemplate,
 } from "@/lib/api";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function formatCadence(rule) {
-  const f = rule.frequency;
-  const d = rule.day_of_period;
+function formatCadence(t) {
+  const f = t.frequency;
+  const d = t.day_of_period;
   if (f === "daily") return "Daily (Mon–Fri)";
   if (f === "weekly") return `Weekly (${DOW[Math.max(0, Math.min(6, d))]})`;
   if (f === "monthly") return `Monthly (day ${d})`;
@@ -28,40 +27,41 @@ function formatCadence(rule) {
   return f;
 }
 
-export default function RecurringRules() {
-  const [rules, setRules] = useState([]);
-  const [clients, setClients] = useState({});
-  const [staff, setStaff] = useState({});
+export default function TaskTemplates() {
+  const [templates, setTemplates] = useState([]);
+  const [attachCounts, setAttachCounts] = useState({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [search, setSearch] = useState("");
 
   const load = async () => {
-    const [r, c, s] = await Promise.all([listRules(), listClients(), listStaff()]);
-    setRules(r);
-    setClients(Object.fromEntries(c.map((x) => [x.id, x])));
-    setStaff(Object.fromEntries(s.map((x) => [x.id, x])));
+    const [t, a] = await Promise.all([listTemplates(), listAssignments()]);
+    setTemplates(t);
+    const counts = {};
+    a.forEach((x) => {
+      counts[x.template_id] = (counts[x.template_id] || 0) + 1;
+    });
+    setAttachCounts(counts);
   };
 
   useEffect(() => {
     load();
   }, []);
 
-  const filtered = rules.filter((r) => {
+  const filtered = templates.filter((t) => {
     if (!search) return true;
     const q = search.toLowerCase();
-    const c = clients[r.client_id];
     return (
-      r.task_name.toLowerCase().includes(q) ||
-      (c?.name || "").toLowerCase().includes(q) ||
-      (r.category || "").toLowerCase().includes(q)
+      t.task_name.toLowerCase().includes(q) ||
+      (t.category || "").toLowerCase().includes(q)
     );
   });
 
-  const remove = async (r) => {
-    if (!confirm(`Delete rule "${r.task_name}"?`)) return;
-    await deleteRule(r.id);
-    toast.success("Rule deleted");
+  const remove = async (t) => {
+    if (!confirm(`Delete template "${t.task_name}"? All client assignments using this template will also be removed.`))
+      return;
+    await deleteTemplate(t.id);
+    toast.success("Template deleted");
     load();
   };
 
@@ -70,15 +70,17 @@ export default function RecurringRules() {
       <div className="flex items-start justify-between">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-widest text-blue-700">
-            Automation Engine
+            Automation Engine · Global Master
           </span>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 mt-1">
-            Recurring Task Rules
+            Standard Task Templates
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Define the cadence once — task instances auto-generate each day.
-            <span className="font-medium text-slate-700"> {rules.length}</span> rule
-            {rules.length === 1 ? "" : "s"} configured.
+            Client-agnostic task definitions. Attach them to specific clients in{" "}
+            <Link to="/assignments" className="text-blue-700 hover:underline">
+              Client Assignments
+            </Link>
+            .
           </p>
         </div>
         <Button
@@ -87,18 +89,18 @@ export default function RecurringRules() {
             setEditing(null);
             setDialogOpen(true);
           }}
-          data-testid="btn-add-rule"
+          data-testid="btn-add-template"
           className="bg-[#0B1E3F] hover:bg-[#132D5E] text-white"
         >
           <Plus className="w-3.5 h-3.5 mr-1.5" />
-          New Recurring Rule
+          New Task Template
         </Button>
       </div>
 
       {/* Cadence summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {["daily", "weekly", "monthly", "quarterly"].map((f) => {
-          const count = rules.filter((r) => r.frequency === f && r.active).length;
+          const count = templates.filter((t) => t.frequency === f && t.active).length;
           return (
             <div
               key={f}
@@ -107,7 +109,7 @@ export default function RecurringRules() {
             >
               <div className="th-caps mb-1">{f} cadence</div>
               <div className="text-2xl font-bold text-slate-900">{count}</div>
-              <div className="text-[11px] text-slate-500">active rules</div>
+              <div className="text-[11px] text-slate-500">active templates</div>
             </div>
           );
         })}
@@ -118,10 +120,10 @@ export default function RecurringRules() {
           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <Input
             className="pl-9 h-9 text-sm"
-            placeholder="Search rule by task, client, or category…"
+            placeholder="Search template by name or category…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            data-testid="rules-search-input"
+            data-testid="templates-search-input"
           />
         </div>
       </div>
@@ -129,93 +131,86 @@ export default function RecurringRules() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={Repeat}
-          title={rules.length === 0 ? "No recurring rules yet" : "No matches"}
+          title={templates.length === 0 ? "No task templates yet" : "No matches"}
           description={
-            rules.length === 0
-              ? "Create a rule (e.g. GSTR-1 monthly on day 11 for ABC Ltd) and it will spawn tasks automatically."
-              : "Adjust your search to find a rule."
+            templates.length === 0
+              ? "Create your first template (e.g. GSTR-1 Filing, monthly on day 11) — then attach it to clients from Client Assignments."
+              : "Adjust your search to find a template."
           }
           action={
-            rules.length === 0 && (
+            templates.length === 0 && (
               <Button
                 size="sm"
                 onClick={() => setDialogOpen(true)}
                 className="bg-[#0B1E3F] hover:bg-[#132D5E] text-white"
               >
-                <Plus className="w-3.5 h-3.5 mr-1.5" /> Add first rule
+                <Plus className="w-3.5 h-3.5 mr-1.5" /> Add first template
               </Button>
             )
           }
-          testId="empty-rules"
+          testId="empty-templates"
         />
       ) : (
         <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-slate-50/70">
               <tr>
-                <th className="th-caps text-left px-4 py-2">Client</th>
-                <th className="th-caps text-left px-3 py-2">Task</th>
+                <th className="th-caps text-left px-4 py-2">Task Name</th>
                 <th className="th-caps text-left px-3 py-2">Category</th>
                 <th className="th-caps text-left px-3 py-2">Cadence</th>
-                <th className="th-caps text-left px-3 py-2">Staff</th>
-                <th className="th-caps text-left px-3 py-2">Priority</th>
+                <th className="th-caps text-left px-3 py-2">Default Priority</th>
+                <th className="th-caps text-left px-3 py-2">SLA</th>
+                <th className="th-caps text-left px-3 py-2">Attached</th>
                 <th className="th-caps text-left px-3 py-2">Active</th>
                 <th className="th-caps text-right px-3 py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r) => (
+              {filtered.map((t) => (
                 <tr
-                  key={r.id}
-                  data-testid={`rule-row-${r.id}`}
+                  key={t.id}
+                  data-testid={`template-row-${t.id}`}
                   className="border-t border-slate-100 tr-hover"
                 >
-                  <td className="px-4 py-3">
-                    <div className="text-slate-900 font-medium">
-                      {clients[r.client_id]?.name || "—"}
-                    </div>
-                    <div className="text-[11px] text-slate-500 font-mono">
-                      {clients[r.client_id]?.code}
-                    </div>
-                  </td>
-                  <td className="px-3 py-3 text-slate-800">{r.task_name}</td>
+                  <td className="px-4 py-3 text-slate-900 font-medium">{t.task_name}</td>
                   <td className="px-3 py-3">
                     <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700">
-                      {r.category}
+                      {t.category}
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-slate-700 text-xs">{formatCadence(r)}</td>
+                  <td className="px-3 py-3 text-slate-700 text-xs">{formatCadence(t)}</td>
                   <td className="px-3 py-3">
-                    <StaffAvatar staff={staff[r.assigned_staff_id]} />
+                    <PriorityBadge priority={t.default_priority} />
                   </td>
-                  <td className="px-3 py-3">
-                    <PriorityBadge priority={r.priority} />
+                  <td className="px-3 py-3 text-slate-600 text-xs">{t.sla_notes || "—"}</td>
+                  <td className="px-3 py-3 text-slate-700 font-mono text-xs">
+                    {attachCounts[t.id] || 0} client{(attachCounts[t.id] || 0) === 1 ? "" : "s"}
                   </td>
                   <td className="px-3 py-3">
                     <Switch
-                      checked={r.active}
+                      checked={t.active}
                       onCheckedChange={async (v) => {
-                        await updateRule(r.id, { ...r, active: v });
+                        await updateTemplate(t.id, { ...t, active: v });
                         load();
                       }}
-                      data-testid={`rule-active-toggle-${r.id}`}
+                      data-testid={`template-active-toggle-${t.id}`}
                     />
                   </td>
                   <td className="px-3 py-3 text-right">
                     <button
                       className="text-slate-500 hover:text-slate-800 mr-2"
                       onClick={() => {
-                        setEditing(r);
+                        setEditing(t);
                         setDialogOpen(true);
                       }}
-                      data-testid={`rule-edit-${r.id}`}
+                      data-testid={`template-edit-${t.id}`}
                     >
                       <Pencil className="w-4 h-4 inline" />
                     </button>
                     <button
                       className="text-red-500 hover:text-red-700"
-                      onClick={() => remove(r)}
-                      data-testid={`rule-delete-${r.id}`}
+                      onClick={() => remove(t)}
+                      data-testid={`template-delete-${t.id}`}
                     >
                       <Trash2 className="w-4 h-4 inline" />
                     </button>
@@ -227,10 +222,10 @@ export default function RecurringRules() {
         </div>
       )}
 
-      <NewRuleDialog
+      <NewTemplateDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        editRule={editing}
+        editTemplate={editing}
         onSaved={load}
       />
     </div>

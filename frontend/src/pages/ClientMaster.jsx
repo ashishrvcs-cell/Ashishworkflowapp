@@ -10,7 +10,7 @@ import StaffAvatar from "@/components/StaffAvatar";
 import {
   listClients,
   listStaff,
-  listRules,
+  listAssignments,
   deleteClient,
   updateClient,
 } from "@/lib/api";
@@ -26,11 +26,11 @@ export default function ClientMaster() {
   const [editing, setEditing] = useState(null);
 
   const load = async () => {
-    const [cl, st, rl] = await Promise.all([listClients(), listStaff(), listRules()]);
+    const [cl, st, as] = await Promise.all([listClients(), listStaff(), listAssignments()]);
     setClients(cl);
     setStaff(Object.fromEntries(st.map((s) => [s.id, s])));
     const counts = {};
-    rl.forEach((r) => {
+    as.forEach((r) => {
       counts[r.client_id] = (counts[r.client_id] || 0) + 1;
     });
     setRuleCounts(counts);
@@ -144,7 +144,7 @@ export default function ClientMaster() {
                 <th className="th-caps text-left px-3 py-2">Category</th>
                 <th className="th-caps text-left px-3 py-2">Main Staff</th>
                 <th className="th-caps text-left px-3 py-2">Backup Staff</th>
-                <th className="th-caps text-left px-3 py-2">Rules</th>
+                <th className="th-caps text-left px-3 py-2">Assignments</th>
                 <th className="th-caps text-left px-3 py-2">Active</th>
                 <th className="th-caps text-right px-3 py-2">Actions</th>
               </tr>

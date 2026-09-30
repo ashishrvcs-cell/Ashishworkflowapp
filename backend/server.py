@@ -18,7 +18,7 @@ mongo_url = os.environ["MONGO_URL"]
 mongo_client = AsyncIOMotorClient(mongo_url)
 db = mongo_client[os.environ["DB_NAME"]]
 
-app = FastAPI(title="LedgerFlow Practice Management")
+app = FastAPI(title="Ashish Team Work Flow")
 api = APIRouter(prefix="/api")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -457,7 +457,7 @@ async def dashboard_stats(today: Optional[str] = None):
 
 @api.get("/")
 async def root():
-    return {"service": "LedgerFlow Practice Management", "status": "ok"}
+    return {"service": "Ashish Team Work Flow", "status": "ok"}
 
 
 app.include_router(api)

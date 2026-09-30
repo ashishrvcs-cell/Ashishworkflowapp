@@ -55,11 +55,11 @@ export default function AppLayout() {
         <div className="px-5 py-5 border-b border-white/5">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded bg-blue-500/20 border border-blue-400/30 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">L</span>
+              <span className="text-white font-bold text-sm">A</span>
             </div>
             <div>
-              <div className="text-white font-semibold tracking-tight text-[15px]">LedgerFlow</div>
-              <div className="text-[10px] uppercase tracking-widest text-slate-400">Practice Engine</div>
+              <div className="text-white font-semibold tracking-tight text-[15px]">Ashish</div>
+              <div className="text-[10px] uppercase tracking-widest text-slate-400">Team Work Flow</div>
             </div>
           </div>
         </div>
@@ -94,7 +94,7 @@ export default function AppLayout() {
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30">
           <div className="flex items-center gap-4">
             <h1 className="text-[15px] font-semibold text-slate-900 tracking-tight">
-              Practice Management
+              Ashish · Team Work Flow
             </h1>
             <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-600">
               <CalendarDays className="w-3.5 h-3.5 text-slate-500" />

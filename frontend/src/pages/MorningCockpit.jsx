@@ -159,7 +159,7 @@ export default function MorningCockpit() {
 
       {empty && (
         <div className="bg-white border border-dashed border-slate-300 rounded-lg p-8 text-center">
-          <h3 className="text-base font-semibold text-slate-900 mb-1">Welcome to LedgerFlow</h3>
+          <h3 className="text-base font-semibold text-slate-900 mb-1">Welcome to Ashish · Team Work Flow</h3>
           <p className="text-sm text-slate-500 mb-4 max-w-lg mx-auto">
             Start by adding your team, clients, and defining recurring task rules. Then use
             &quot;Generate Today&apos;s Work&quot; from the top bar every morning to auto-populate today&apos;s queue.

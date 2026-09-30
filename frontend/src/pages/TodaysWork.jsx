@@ -35,7 +35,7 @@ export default function TodaysWork() {
   const [search, setSearch] = useState("");
 
   const load = async () => {
-    const params = {};
+    const params = { today: todayISO() };
     if (scope === "today") params.due_date = todayISO();
     if (scope === "overdue") params.overdue = true;
     const [t, cl, st] = await Promise.all([listTasks(params), listClients(), listStaff()]);

@@ -65,7 +65,7 @@ export default function MorningCockpit() {
   const load = async () => {
     const [s, ov, hd, cl, st] = await Promise.all([
       dashboardStats(),
-      listTasks({ overdue: true }),
+      listTasks({ overdue: true, today: todayISO() }),
       listTasks({ status: "hold" }),
       listClients(),
       listStaff(),

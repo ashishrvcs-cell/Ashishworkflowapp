@@ -319,6 +319,7 @@ async def list_tasks(
     staff_id: Optional[str] = None,
     client_id: Optional[str] = None,
     overdue: Optional[bool] = None,
+    today: Optional[str] = None,
 ):
     filt = {}
     if due_date:
@@ -330,7 +331,8 @@ async def list_tasks(
     if client_id:
         filt["client_id"] = client_id
     if overdue:
-        filt["due_date"] = {"$lt": today_str()}
+        ref = today or today_str()
+        filt["due_date"] = {"$lt": ref}
         filt["status"] = {"$in": ["pending", "in_progress"]}
     return await _list(db.tasks, filt)
 
@@ -386,8 +388,8 @@ def _rule_matches_today(rule: dict, ref: date) -> bool:
 
 
 @api.post("/tasks/generate_today")
-async def generate_today():
-    ref = date.today()
+async def generate_today(today: Optional[str] = None):
+    ref = date.fromisoformat(today) if today else date.today()
     ref_str = ref.isoformat()
     templates = await _list(db.task_templates, {"active": True})
     tmpl_by_id = {t["id"]: t for t in templates}
@@ -424,8 +426,8 @@ async def generate_today():
 
 # ---------- DASHBOARD ----------
 @api.get("/dashboard/stats")
-async def dashboard_stats():
-    today = today_str()
+async def dashboard_stats(today: Optional[str] = None):
+    today = today or today_str()
     todays_tasks = await db.tasks.count_documents({"due_date": today})
     completed_today = await db.tasks.count_documents({"due_date": today, "status": "completed"})
     pending_today = await db.tasks.count_documents(

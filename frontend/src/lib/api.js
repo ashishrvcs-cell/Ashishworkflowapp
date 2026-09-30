@@ -36,12 +36,20 @@ export const listTasks = (params = {}) => http.get("/tasks", { params }).then((r
 export const createTask = (body) => http.post("/tasks", body).then((r) => r.data);
 export const updateTask = (id, body) => http.patch(`/tasks/${id}`, body).then((r) => r.data);
 export const deleteTask = (id) => http.delete(`/tasks/${id}`).then((r) => r.data);
-export const generateToday = () => http.post("/tasks/generate_today").then((r) => r.data);
+export const generateToday = () =>
+  http.post("/tasks/generate_today", null, { params: { today: todayISO() } }).then((r) => r.data);
 
 // Dashboard
-export const dashboardStats = () => http.get("/dashboard/stats").then((r) => r.data);
+export const dashboardStats = () =>
+  http.get("/dashboard/stats", { params: { today: todayISO() } }).then((r) => r.data);
 
-export const todayISO = () => new Date().toISOString().slice(0, 10);
+export const todayISO = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
 
 export const daysBetween = (a, b) => {
   const d1 = new Date(a + "T00:00:00");

@@ -170,54 +170,61 @@ export default function TodaysWork() {
         />
       ) : (
         <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50/70">
+          <table className="w-full text-[13px]">
+            <thead className="bg-slate-100 border-b border-slate-200">
               <tr>
-                <th className="th-caps text-left px-4 py-2">Client</th>
-                <th className="th-caps text-left px-3 py-2">Task</th>
-                <th className="th-caps text-left px-3 py-2">Due Date</th>
-                <th className="th-caps text-left px-3 py-2">Staff</th>
-                <th className="th-caps text-left px-3 py-2">Priority</th>
-                <th className="th-caps text-left px-3 py-2">Status</th>
-                <th className="th-caps text-right px-3 py-2">Quick Actions</th>
+                <th className="th-caps text-left px-3 py-1.5">Client</th>
+                <th className="th-caps text-left px-3 py-1.5">Task</th>
+                <th className="th-caps text-left px-3 py-1.5">Due</th>
+                <th className="th-caps text-left px-3 py-1.5">Staff</th>
+                <th className="th-caps text-left px-3 py-1.5">Priority</th>
+                <th className="th-caps text-left px-3 py-1.5">Status</th>
+                <th className="th-caps text-right px-3 py-1.5">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((t) => {
+              {filtered.map((t, idx) => {
                 const c = clients[t.client_id];
                 const s = staff[t.assigned_staff_id];
                 const overdue =
                   t.due_date < todayISO() && ["pending", "in_progress"].includes(t.status);
+                const zebra = idx % 2 === 0 ? "bg-white" : "bg-slate-50";
                 return (
                   <tr
                     key={t.id}
                     data-testid={`task-row-${t.id}`}
-                    className="border-t border-slate-100 tr-hover"
+                    className={`${zebra} border-b border-slate-100 hover:bg-blue-50/40 transition-colors`}
                   >
-                    <td className="px-4 py-3">
-                      <div className="text-slate-900 font-medium">{c?.name || "—"}</div>
-                      <div className="text-[11px] text-slate-500 font-mono">{c?.code}</div>
+                    <td className="px-3 py-1.5 whitespace-nowrap">
+                      <span className="font-mono text-[11px] bg-slate-100 text-slate-600 rounded px-1.5 py-0.5 mr-2">
+                        {c?.code || "—"}
+                      </span>
+                      <span className="text-slate-900 font-medium">{c?.name || "—"}</span>
                     </td>
-                    <td className="px-3 py-3 text-slate-700">
-                      <div>{t.task_name}</div>
+                    <td className="px-3 py-1.5">
+                      <span className="text-slate-800">{t.task_name}</span>
                       {t.category && (
-                        <div className="text-[11px] text-slate-500 mt-0.5">{t.category}</div>
+                        <span className="ml-2 text-[10px] uppercase tracking-wider text-slate-400">
+                          · {t.category}
+                        </span>
                       )}
                     </td>
-                    <td className="px-3 py-3 text-slate-700 font-mono text-xs">{t.due_date}</td>
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-1.5 text-slate-700 font-mono text-[11px] whitespace-nowrap">
+                      {t.due_date}
+                    </td>
+                    <td className="px-3 py-1.5">
                       <StaffAvatar staff={s} />
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-1.5">
                       <PriorityBadge priority={t.priority} />
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-3 py-1.5">
                       <StatusPill status={t.status} overdue={overdue} />
                     </td>
-                    <td className="px-3 py-3 text-right whitespace-nowrap">
+                    <td className="px-3 py-1.5 text-right whitespace-nowrap">
                       {t.status !== "completed" && (
                         <button
-                          className="text-emerald-600 hover:text-emerald-800 mr-2"
+                          className="text-emerald-600 hover:text-emerald-800 mr-1.5"
                           title="Mark completed"
                           onClick={() => change(t, { status: "completed" })}
                           data-testid={`task-complete-${t.id}`}
@@ -227,7 +234,7 @@ export default function TodaysWork() {
                       )}
                       {t.status === "pending" && (
                         <button
-                          className="text-blue-600 hover:text-blue-800 mr-2"
+                          className="text-blue-600 hover:text-blue-800 mr-1.5"
                           title="Start"
                           onClick={() => change(t, { status: "in_progress" })}
                           data-testid={`task-start-${t.id}`}
@@ -237,7 +244,7 @@ export default function TodaysWork() {
                       )}
                       {t.status !== "hold" && t.status !== "completed" && (
                         <button
-                          className="text-amber-600 hover:text-amber-800 mr-2"
+                          className="text-amber-600 hover:text-amber-800 mr-1.5"
                           title="Put on hold"
                           onClick={() => change(t, { status: "hold" })}
                           data-testid={`task-hold-${t.id}`}
@@ -247,7 +254,7 @@ export default function TodaysWork() {
                       )}
                       {(t.status === "hold" || t.status === "completed") && (
                         <button
-                          className="text-slate-600 hover:text-slate-800 mr-2"
+                          className="text-slate-600 hover:text-slate-800 mr-1.5"
                           title="Reopen"
                           onClick={() => change(t, { status: "pending", hold_reason: null })}
                           data-testid={`task-reopen-${t.id}`}
@@ -269,6 +276,9 @@ export default function TodaysWork() {
               })}
             </tbody>
           </table>
+          <div className="px-3 py-2 text-[11px] text-slate-500 bg-slate-50 border-t border-slate-100">
+            {filtered.length} task{filtered.length === 1 ? "" : "s"} shown
+          </div>
         </div>
       )}
     </div>

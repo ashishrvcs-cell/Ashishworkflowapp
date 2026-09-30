@@ -1,0 +1,226 @@
+{
+  "project_name": "LedgerFlow Practice Management",
+  "app_type": "dashboard / practice_management_saas",
+  "archetype": "THE PRECISION PRACTITIONER (Swiss High-Contrast meets Traditional British Accounting Chamber)",
+  "emotional_tone": "Utilitarian, trustworthy, uncluttered, surgical precision, calm command-center",
+  "theme": "Light mode primary (deep crisp navy sidebar + porcelain off-white canvas + pure white cards + surgical red alert accent)",
+  "design_principles": [
+    "Utilitarian first: No decorative clutter, no bloated AI animations, every pixel serves workflow efficiency",
+    "Navy Authority & Red Alert: LedgerFlow deep navy (#0B1E3F) anchors structure and primary actions; vibrant red (#DC2626) is strictly reserved for overdue & critical SLA violations",
+    "Dense Quiet Tables: Accounting-grade dense tabular grids with micro-caps uppercase headers, crisp borders, and subtle row hover transitions",
+    "Instant State Clarity: Status pills (Pending, In Progress, Completed, Hold, Overdue) with unmistakable muted tints and high-contrast text",
+    "Tactile Direct Manipulation: Inline status transitions, quick mark-complete actions, and modal fast-drawers"
+  ],
+  "typography": {
+    "font_family_recommendation": "Instrument Sans, Manrope, or Geist (Google Fonts embed / clean sans-serif stack)",
+    "font_family_stack": "'Instrument Sans', 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    "google_font_url": "https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500;600&display=swap",
+    "font_mono_stack": "'JetBrains Mono', 'IBM Plex Mono', Consolas, monospace",
+    "hierarchy": {
+      "h1_page_title": "text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight",
+      "h2_section_title": "text-lg sm:text-xl font-semibold tracking-tight text-slate-900",
+      "h3_card_title": "text-sm font-semibold tracking-normal text-slate-800",
+      "h4_widget_header": "text-xs font-bold tracking-wider uppercase text-slate-500",
+      "table_header": "text-[11px] font-bold uppercase tracking-wider text-slate-500",
+      "body": "text-sm text-slate-700 font-normal leading-relaxed",
+      "body_dense": "text-[13px] text-slate-800 font-normal leading-snug",
+      "mono_metric": "font-mono text-xs font-semibold tracking-tight",
+      "subtext_muted": "text-xs text-slate-500"
+    }
+  },
+  "colors": {
+    "palette": {
+      "brand_navy_sidebar": "#0B1E3F",
+      "brand_navy_dark": "#071329",
+      "brand_navy_hover": "#132D5E",
+      "brand_navy_active": "#1D3F7F",
+      "brand_navy_border": "rgba(255, 255, 255, 0.08)",
+      "primary_action": "#0B1E3F",
+      "primary_action_hover": "#132D5E",
+      "canvas_background": "#F8FAFC",
+      "card_background": "#FFFFFF",
+      "border_default": "#E2E8F0",
+      "border_subtle": "#F1F5F9",
+      "text_main": "#0F172A",
+      "text_muted": "#64748B",
+      "text_subtle": "#94A3B8"
+    },
+    "kpi_card_accents": {
+      "today_total": {
+        "bg": "bg-blue-50/70",
+        "border": "border-blue-200/80",
+        "icon_color": "text-blue-700",
+        "stat_color": "text-blue-950"
+      },
+      "completed": {
+        "bg": "bg-emerald-50/70",
+        "border": "border-emerald-200/80",
+        "icon_color": "text-emerald-700",
+        "stat_color": "text-emerald-950"
+      },
+      "pending": {
+        "bg": "bg-slate-50/90",
+        "border": "border-slate-200/90",
+        "icon_color": "text-slate-700",
+        "stat_color": "text-slate-900"
+      },
+      "overdue": {
+        "bg": "bg-red-50/80",
+        "border": "border-red-300",
+        "icon_color": "text-red-700",
+        "stat_color": "text-red-900"
+      },
+      "on_hold": {
+        "bg": "bg-amber-50/80",
+        "border": "border-amber-200/80",
+        "icon_color": "text-amber-700",
+        "stat_color": "text-amber-950"
+      }
+    },
+    "status_badges": {
+      "pending": "bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200",
+      "in_progress": "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100",
+      "completed": "bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100",
+      "on_hold": "bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100",
+      "overdue": "bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 font-semibold"
+    },
+    "priority_badges": {
+      "critical": "bg-red-100 text-red-800 border border-red-300 font-semibold",
+      "high": "bg-orange-100 text-orange-800 border border-orange-200",
+      "medium": "bg-blue-50 text-blue-700 border border-blue-200",
+      "low": "bg-slate-100 text-slate-600 border border-slate-200"
+    }
+  },
+  "layout_and_spacing": {
+    "structure": "Fixed left sidebar (w-64) + Top header (h-16) + Main fluid scrollable content area (max-w-7xl mx-auto px-6 py-6)",
+    "sidebar": {
+      "width": "w-64",
+      "bg": "bg-[#0B1E3F]",
+      "text": "text-slate-300",
+      "active_item": "bg-[#163366] text-white font-medium border-l-4 border-blue-400",
+      "hover_item": "hover:bg-[#132D5E] hover:text-white"
+    },
+    "top_header": {
+      "height": "h-16",
+      "bg": "bg-white border-b border-slate-200 shadow-sm",
+      "elements": [
+        "Current live Practice Date display (e.g. Wednesday, July 15, 2026)",
+        "Search bar for fast client or task lookup",
+        "Quick Action: 'Generate Today's Work' button (subtle navy/blue outline)",
+        "Primary Action: '+ New Task' button (solid LedgerFlow Navy #0B1E3F)"
+      ]
+    },
+    "grid_modes": {
+      "kpi_row": "grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 mb-6",
+      "cockpit_split": "grid grid-cols-1 lg:grid-cols-12 gap-6",
+      "cockpit_overdue_col": "lg:col-span-7",
+      "cockpit_hold_col": "lg:col-span-5"
+    }
+  },
+  "component_blueprints": {
+    "StatCard": {
+      "purpose": "Show immediate operational counts on Morning Cockpit",
+      "props": ["title", "count", "label", "icon", "variant", "onClick", "activeFilter", "testId"],
+      "classes": "p-4 rounded-lg border transition-all duration-150 hover:shadow-sm cursor-pointer relative overflow-hidden"
+    },
+    "OverdueTable": {
+      "purpose": "Highlight urgent and SLA-breached tasks immediately in Cockpit",
+      "columns": ["Client (Code + Name)", "Task Name", "Assigned Staff", "Due Date", "Days Overdue", "Priority", "Quick Actions"],
+      "empty_state": "All tasks are on track. No overdue items."
+    },
+    "TasksOnHoldTable": {
+      "purpose": "Display blocked items requiring partner/client attention",
+      "columns": ["Client", "Task", "Hold Reason / Remarks", "Staff", "Resume Action"],
+      "empty_state": "Zero tasks on hold."
+    },
+    "TodaysWorkView": {
+      "purpose": "Comprehensive task workbench for staff & practice partner",
+      "filters": [
+        "Staff member dropdown (All Staff + individual)",
+        "Status filter tabs (All, Pending, In Progress, Completed, Hold)",
+        "Priority filter (All, Critical, High, Medium, Low)",
+        "Client quick filter selector"
+      ],
+      "actions": [
+        "Generate Today's Work (creates daily/weekly/monthly instances for today from active Recurring Rules)",
+        "Mark Complete with 1-click checkbox",
+        "Inline status switcher",
+        "Add Remarks modal / inline editable field"
+      ]
+    },
+    "ClientMaster": {
+      "purpose": "Central directory of business & individual clients",
+      "columns": ["Client Code", "Client Name", "Category (Tax, Audit, Advisory, Bookkeeping)", "Main Staff", "Backup Staff", "Recurring Rules Count", "Status (Active/Inactive)", "Actions (Edit, Manage Rules, Toggle)"],
+      "actions": ["Add Client button with dialog", "Search by code or name", "Filter by Category", "Inline active toggle"]
+    },
+    "RecurringRulesMaster": {
+      "purpose": "Automated recurring compliance engine rules (GST, TDS, Payroll, VAT, Monthly Closure, Bank Reco)",
+      "rule_templates": [
+        {"name": "Bank Reconciliation", "frequency": "Weekly", "category": "Bookkeeping", "sla_days": 2},
+        {"name": "Payroll Processing & Filing", "frequency": "Monthly", "category": "Payroll", "sla_days": 3},
+        {"name": "Statutory GST/VAT Return", "frequency": "Monthly", "category": "Statutory / Tax", "sla_days": 5},
+        {"name": "Quarterly Financial Review", "frequency": "Quarterly", "category": "Advisory", "sla_days": 7}
+      ],
+      "columns": ["Client", "Task Title", "Category", "Frequency (Daily/Weekly/Monthly/Custom)", "Due Rule (e.g. 5th of Month)", "Assigned Staff", "Priority", "Status", "Actions"]
+    },
+    "StaffMaster": {
+      "purpose": "Manage accounting practice staff members and initials for avatar badge assignment",
+      "fields": ["Name", "Role (Partner, Senior Accountant, Junior Auditor, Bookkeeper)", "Email", "Initials", "Active Tasks Count"]
+    }
+  },
+  "mock_and_persistence_strategy": {
+    "start_state": "Empty initial state as requested ('Start empty (no seed data)'), BUT provide a clear, non-intrusive 'Load Practice Demo Data' option or guided empty states so users can test immediately with 1 click if desired, without forcing it.",
+    "localStorage_key": "ledgerflow_practice_data_v1",
+    "entities": ["clients", "recurringRules", "tasks", "staffList", "activityLogs"]
+  },
+  "interactive_dialogs": {
+    "NewTaskDialog": {
+      "trigger": "[data-testid='btn-new-task']",
+      "fields": ["Client (select)", "Task Title", "Category", "Assigned Staff", "Due Date (Shadcn Calendar)", "Priority", "Notes / Checklist"]
+    },
+    "NewClientDialog": {
+      "trigger": "[data-testid='btn-add-client']",
+      "fields": ["Client Code (e.g. CLI-101)", "Client Name", "Category", "Main Staff", "Backup Staff", "Contact Email / Phone", "Notes"]
+    },
+    "NewRuleDialog": {
+      "trigger": "[data-testid='btn-add-rule']",
+      "fields": ["Client", "Task Name", "Category", "Frequency (Daily, Weekly, Monthly, Quarterly)", "Day of Period (e.g. Day 5 or Every Monday)", "Assigned Staff", "Priority"]
+    },
+    "HoldReasonModal": {
+      "trigger": "When moving status to 'Hold'",
+      "fields": ["Reason for Hold (e.g. Awaiting Bank Statement from Client, Query pending with tax dept)", "Follow-up Date"]
+    }
+  },
+  "data_test_ids": {
+    "nav_cockpit": "nav-morning-cockpit",
+    "nav_todays_work": "nav-todays-work",
+    "nav_clients": "nav-client-master",
+    "nav_recurring_rules": "nav-recurring-rules",
+    "btn_generate_work": "btn-generate-todays-work",
+    "btn_new_task": "btn-new-task",
+    "btn_add_client": "btn-add-client",
+    "btn_add_rule": "btn-add-rule",
+    "kpi_total": "kpi-card-total",
+    "kpi_completed": "kpi-card-completed",
+    "kpi_pending": "kpi-card-pending",
+    "kpi_overdue": "kpi-card-overdue",
+    "kpi_hold": "kpi-card-hold",
+    "filter_staff": "filter-staff-select",
+    "filter_status": "filter-status-select",
+    "filter_priority": "filter-priority-select",
+    "search_input": "search-input",
+    "task_row_item": "task-row",
+    "client_row_item": "client-row",
+    "rule_row_item": "rule-row"
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the LedgerFlow Navy (#0B1E3F) aesthetic with red accent (#DC2626) ONLY for overdue and critical alert badges.",
+    "Implement the 4 core routes/tabs cleanly: 1) Morning Cockpit (Dashboard), 2) Today's Work, 3) Client Master, 4) Recurring Task Rules. Include Staff Master inline or as a modal/sub-panel.",
+    "Implement the 'Generate Today's Work' button: it checks active recurring rules, checks if a task for today already exists, and spawns today's task instances with a satisfying toast notification.",
+    "Keep tables dense, quiet, high-contrast, with uppercase micro-headers (`text-[11px] font-bold uppercase tracking-wider text-slate-500`).",
+    "Use Lucide icons exclusively (e.g., ClipboardList, CheckCircle2, Clock, AlertTriangle, PauseCircle, Users, Repeat, Plus, Filter, Search, ArrowRight). No AI assistant emojis.",
+    "Make sure all modals and dialogs have solid, crisp backgrounds (`bg-white`), never transparent.",
+    "Provide clear, useful empty states when starting fresh, plus a subtle 'Load Sample Practice Data' button on the empty state banner to let the reviewer inspect rich data instantly if needed.",
+    "Add all requested data-testid attributes to allow end-to-end automated testing."
+  ]
+}

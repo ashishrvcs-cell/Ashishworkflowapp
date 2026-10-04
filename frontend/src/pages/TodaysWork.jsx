@@ -11,6 +11,7 @@ import {
 import { StatusPill, PriorityBadge } from "@/components/StatusPill";
 import StaffAvatar from "@/components/StaffAvatar";
 import EmptyState from "@/components/EmptyState";
+import CompleteTaskDialog from "@/components/dialogs/CompleteTaskDialog";
 import {
   listTasks,
   listClients,
@@ -24,6 +25,23 @@ import { ClipboardList } from "lucide-react";
 
 const ALL = "__all__";
 
+const localDay = (iso) => {
+  const d = new Date(iso);
+  return (
+    d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0")
+  );
+};
+
+// Today view: tasks due today, plus one-time (manual) tasks with a later due date that were
+// created today or earlier and are still open (or were completed today).
+const inToday = (t) => {
+  const today = todayISO();
+  if (t.due_date === today) return true;
+  if (t.assignment_id || t.template_id || t.due_date < today) return false;
+  if (t.status !== "completed") return localDay(t.created_at) <= today;
+  return !!t.completed_at && localDay(t.completed_at) === today;
+};
+
 export default function TodaysWork() {
   const [tasks, setTasks] = useState([]);
   const [clients, setClients] = useState({});
@@ -33,13 +51,13 @@ export default function TodaysWork() {
   const [priorityFilter, setPriorityFilter] = useState(ALL);
   const [scope, setScope] = useState("today"); // today | all | overdue
   const [search, setSearch] = useState("");
+  const [completing, setCompleting] = useState(null);
 
   const load = async () => {
     const params = { today: todayISO() };
-    if (scope === "today") params.due_date = todayISO();
     if (scope === "overdue") params.overdue = true;
     const [t, cl, st] = await Promise.all([listTasks(params), listClients(), listStaff()]);
-    setTasks(t);
+    setTasks(scope === "today" ? t.filter(inToday) : t);
     setClients(Object.fromEntries(cl.map((c) => [c.id, c])));
     setStaff(Object.fromEntries(st.map((s) => [s.id, s])));
   };
@@ -220,13 +238,18 @@ export default function TodaysWork() {
                     </td>
                     <td className="px-3 py-1.5">
                       <StatusPill status={t.status} overdue={overdue} />
+                      {t.status === "completed" && staff[t.completed_by_staff_id] && (
+                        <div className="text-[10px] text-slate-500 mt-0.5">
+                          by {staff[t.completed_by_staff_id].name}
+                        </div>
+                      )}
                     </td>
                     <td className="px-3 py-1.5 text-right whitespace-nowrap">
                       {t.status !== "completed" && (
                         <button
                           className="text-emerald-600 hover:text-emerald-800 mr-1.5"
                           title="Mark completed"
-                          onClick={() => change(t, { status: "completed" })}
+                          onClick={() => setCompleting(t)}
                           data-testid={`task-complete-${t.id}`}
                         >
                           <CheckCircle2 className="w-4 h-4 inline" />
@@ -281,6 +304,15 @@ export default function TodaysWork() {
           </div>
         </div>
       )}
+      <CompleteTaskDialog
+        task={completing}
+        client={completing ? clients[completing.client_id] : null}
+        staff={Object.values(staff)}
+        onClose={() => setCompleting(null)}
+        onConfirm={(task, staffId) =>
+          change(task, { status: "completed", completed_by_staff_id: staffId })
+        }
+      />
     </div>
   );
 }

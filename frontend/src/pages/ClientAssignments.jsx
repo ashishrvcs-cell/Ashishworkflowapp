@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Plus, Pencil, Trash2, Network, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Network, Search, ListPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -12,7 +12,10 @@ import {
 } from "@/components/ui/select";
 import EmptyState from "@/components/EmptyState";
 import NewAssignmentDialog from "@/components/dialogs/NewAssignmentDialog";
-import { PriorityBadge } from "@/components/StatusPill";
+import BulkAttachDialog from "@/components/dialogs/BulkAttachDialog";
+import BulkClientsDialog from "@/components/dialogs/BulkClientsDialog";
+import EditTaskDialog from "@/components/dialogs/EditTaskDialog";
+import { PriorityBadge, StatusPill } from "@/components/StatusPill";
 import StaffAvatar from "@/components/StaffAvatar";
 import {
   listAssignments,
@@ -21,6 +24,8 @@ import {
   listStaff,
   deleteAssignment,
   updateAssignment,
+  listTasks,
+  deleteTask,
 } from "@/lib/api";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
@@ -48,15 +53,21 @@ export default function ClientAssignments() {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkClientsOpen, setBulkClientsOpen] = useState(false);
+  const [oneTime, setOneTime] = useState([]);
+  const [editingTask, setEditingTask] = useState(null);
 
   const load = async () => {
-    const [a, c, t, s] = await Promise.all([
+    const [a, c, t, s, tk] = await Promise.all([
       listAssignments(),
       listClients(),
       listTemplates(),
       listStaff(),
+      listTasks(),
     ]);
     setAssignments(a);
+    setOneTime(tk.filter((x) => !x.assignment_id && !x.template_id));
     setClients(Object.fromEntries(c.map((x) => [x.id, x])));
     setTemplates(Object.fromEntries(t.map((x) => [x.id, x])));
     setStaff(Object.fromEntries(s.map((x) => [x.id, x])));
@@ -64,6 +75,9 @@ export default function ClientAssignments() {
 
   useEffect(() => {
     load();
+    const handler = () => load();
+    window.addEventListener("ledgerflow:refresh", handler);
+    return () => window.removeEventListener("ledgerflow:refresh", handler);
   }, []);
 
   const clientList = useMemo(() => Object.values(clients), [clients]);
@@ -84,6 +98,30 @@ export default function ClientAssignments() {
     }
     return true;
   });
+
+  const filteredOneTime = oneTime
+    .filter((t) => {
+      if (clientFilter !== ALL && t.client_id !== clientFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const c = clients[t.client_id];
+        if (
+          !(c?.name.toLowerCase().includes(q)) &&
+          !(c?.code.toLowerCase().includes(q)) &&
+          !t.task_name.toLowerCase().includes(q)
+        )
+          return false;
+      }
+      return true;
+    })
+    .sort((a, b) => a.due_date.localeCompare(b.due_date));
+
+  const removeTask = async (t) => {
+    if (!confirm("Delete this one-time task?")) return;
+    await deleteTask(t.id);
+    toast.success("Task deleted");
+    load();
+  };
 
   const remove = async (a) => {
     if (!confirm("Remove this assignment?")) return;
@@ -109,6 +147,27 @@ export default function ClientAssignments() {
             active assignments spawn tasks on <span className="font-medium">Generate Today&apos;s Work</span>.
           </p>
         </div>
+        <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!canCreate}
+          onClick={() => setBulkOpen(true)}
+          data-testid="btn-bulk-assignment"
+        >
+          <ListPlus className="w-3.5 h-3.5 mr-1.5" />
+          Bulk Attach
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!canCreate}
+          onClick={() => setBulkClientsOpen(true)}
+          data-testid="btn-bulk-clients"
+        >
+          <ListPlus className="w-3.5 h-3.5 mr-1.5" />
+          Bulk Add Clients
+        </Button>
         <Button
           size="sm"
           disabled={!canCreate}
@@ -122,6 +181,7 @@ export default function ClientAssignments() {
           <Plus className="w-3.5 h-3.5 mr-1.5" />
           Attach Template
         </Button>
+        </div>
       </div>
 
       {!canCreate && (
@@ -251,6 +311,85 @@ export default function ClientAssignments() {
         </div>
       )}
 
+      {filteredOneTime.length > 0 && (
+        <div className="space-y-2" data-testid="onetime-tasks-section">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900">One-time Tasks</h3>
+            <p className="text-xs text-slate-500">
+              Tasks created with New Task for a single client. They show in Today&apos;s Work from
+              the day they are created until completed.
+            </p>
+          </div>
+          <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50/70">
+                <tr>
+                  <th className="th-caps text-left px-4 py-2">Client</th>
+                  <th className="th-caps text-left px-3 py-2">Task</th>
+                  <th className="th-caps text-left px-3 py-2">Due</th>
+                  <th className="th-caps text-left px-3 py-2">Staff</th>
+                  <th className="th-caps text-left px-3 py-2">Priority</th>
+                  <th className="th-caps text-left px-3 py-2">Status</th>
+                  <th className="th-caps text-right px-3 py-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredOneTime.map((t) => {
+                  const c = clients[t.client_id];
+                  return (
+                    <tr
+                      key={t.id}
+                      data-testid={"onetime-row-" + t.id}
+                      className="border-t border-slate-100 tr-hover"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="text-slate-900 font-medium">{c?.name || "-"}</div>
+                        <div className="text-[11px] text-slate-500 font-mono">{c?.code}</div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="text-slate-800">{t.task_name}</div>
+                        <div className="text-[11px] text-slate-500">{t.category}</div>
+                      </td>
+                      <td className="px-3 py-3 text-slate-700 font-mono text-[11px] whitespace-nowrap">
+                        {t.due_date}
+                      </td>
+                      <td className="px-3 py-3">
+                        <StaffAvatar staff={staff[t.assigned_staff_id]} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <PriorityBadge priority={t.priority} />
+                      </td>
+                      <td className="px-3 py-3">
+                        <StatusPill status={t.status} />
+                      </td>
+                      <td className="px-3 py-3 text-right">
+                        <button
+                          className="text-slate-500 hover:text-slate-800 mr-2"
+                          onClick={() => setEditingTask(t)}
+                          data-testid={"onetime-edit-" + t.id}
+                        >
+                          <Pencil className="w-4 h-4 inline" />
+                        </button>
+                        <button
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => removeTask(t)}
+                          data-testid={"onetime-delete-" + t.id}
+                        >
+                          <Trash2 className="w-4 h-4 inline" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      <EditTaskDialog task={editingTask} onClose={() => setEditingTask(null)} onSaved={load} />
+      <BulkAttachDialog open={bulkOpen} onOpenChange={setBulkOpen} onSaved={load} />
+      <BulkClientsDialog open={bulkClientsOpen} onOpenChange={setBulkClientsOpen} onSaved={load} />
       <NewAssignmentDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}

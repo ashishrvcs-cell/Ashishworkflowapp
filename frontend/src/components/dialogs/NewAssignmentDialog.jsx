@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import SearchableSelect from "@/components/SearchableSelect";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -99,46 +100,11 @@ export default function NewAssignmentDialog({
         <div className="space-y-3">
           <div>
             <Label className="text-xs">Client *</Label>
-            <Select
-              value={form.client_id}
-              onValueChange={(v) => setForm({ ...form, client_id: v })}
-              disabled={!!editAssignment || !!presetClientId}
-            >
-              <SelectTrigger data-testid="assignment-client-select">
-                <SelectValue placeholder="Select client" />
-              </SelectTrigger>
-              <SelectContent>
-                {clients.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.code} — {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect value={form.client_id} onChange={(v) => setForm({ ...form, client_id: v })} disabled={!!editAssignment || !!presetClientId} placeholder="Select client" searchPlaceholder="Type client name or code..." testId="assignment-client-select" options={clients.map((c) => ({ value: c.id, label: c.code + " - " + c.name, sortKey: c.name }))} />
           </div>
           <div>
             <Label className="text-xs">Task Template *</Label>
-            <Select
-              value={form.template_id}
-              onValueChange={(v) => setForm({ ...form, template_id: v })}
-              disabled={!!editAssignment}
-            >
-              <SelectTrigger data-testid="assignment-template-select">
-                <SelectValue placeholder="Select task template" />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.task_name} — {t.frequency}
-                  </SelectItem>
-                ))}
-                {templates.length === 0 && (
-                  <div className="px-3 py-2 text-xs text-slate-500">
-                    No templates yet. Create one first.
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
+            <SearchableSelect value={form.template_id} onChange={(v) => setForm({ ...form, template_id: v })} disabled={!!editAssignment} placeholder="Select task template" searchPlaceholder="Type task name..." testId="assignment-template-select" options={templates.map((t) => ({ value: t.id, label: t.task_name + " - " + t.frequency, sortKey: t.task_name }))} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

@@ -142,6 +142,7 @@ class Task(BaseModel):
     remarks: Optional[str] = None
     hold_reason: Optional[str] = None
     completed_at: Optional[str] = None
+    completed_by_staff_id: Optional[str] = None
     rule_id: Optional[str] = None  # legacy: kept for backward compat
     assignment_id: Optional[str] = None  # if generated from a client assignment
     template_id: Optional[str] = None
@@ -160,6 +161,7 @@ class TaskCreate(BaseModel):
 
 
 class TaskUpdate(BaseModel):
+    client_id: Optional[str] = None
     assigned_staff_id: Optional[str] = None
     task_name: Optional[str] = None
     category: Optional[str] = None
@@ -168,6 +170,7 @@ class TaskUpdate(BaseModel):
     due_date: Optional[str] = None
     remarks: Optional[str] = None
     hold_reason: Optional[str] = None
+    completed_by_staff_id: Optional[str] = None
 
 
 # ---------- CRUD helpers ----------
@@ -302,6 +305,10 @@ async def update_assignment(assignment_id: str, payload: ClientAssignmentCreate)
         raise HTTPException(404, "Assignment not found")
     updated = {**doc, **payload.model_dump()}
     await db.assignments.update_one({"id": assignment_id}, {"$set": updated})
+    await db.tasks.update_many(
+        {"assignment_id": assignment_id, "status": {"$ne": "completed"}, "due_date": {"$gte": today_str()}},
+        {"$set": {"assigned_staff_id": updated.get("assigned_staff_id")}},
+    )
     return ClientAssignment(**updated)
 
 
@@ -349,11 +356,17 @@ async def update_task(task_id: str, payload: TaskUpdate):
     doc = await db.tasks.find_one({"id": task_id}, {"_id": 0})
     if not doc:
         raise HTTPException(404, "Task not found")
-    changes = {k: v for k, v in payload.model_dump().items() if v is not None}
+    nullable = ("assigned_staff_id", "remarks", "hold_reason")
+    changes = {
+        k: v
+        for k, v in payload.model_dump(exclude_unset=True).items()
+        if v is not None or k in nullable
+    }
     if changes.get("status") == "completed" and not doc.get("completed_at"):
         changes["completed_at"] = now_iso()
     if changes.get("status") and changes["status"] != "completed":
         changes["completed_at"] = None
+        changes["completed_by_staff_id"] = None
     updated = {**doc, **changes}
     await db.tasks.update_one({"id": task_id}, {"$set": updated})
     return Task(**updated)
@@ -406,6 +419,11 @@ async def generate_today(today: Optional[str] = None):
             {"assignment_id": a["id"], "due_date": ref_str}
         )
         if exists:
+            if exists.get("status") != "completed" and exists.get("assigned_staff_id") != a.get("assigned_staff_id"):
+                await db.tasks.update_one(
+                    {"assignment_id": a["id"], "due_date": ref_str},
+                    {"$set": {"assigned_staff_id": a.get("assigned_staff_id")}},
+                )
             skipped += 1
             continue
         task = Task(
